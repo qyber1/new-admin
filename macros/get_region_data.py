@@ -11,7 +11,7 @@ def get_regions() -> dict[str, str]:
 
     """
     current_path = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_path, 'full_info.json')
+    file_path = os.path.join(current_path, 'conf/full_info.json')
 
     try:
         with open(file_path) as file:

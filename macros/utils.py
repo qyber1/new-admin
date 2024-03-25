@@ -54,7 +54,7 @@ class Cache:
     '''Выполняется подключение к хранилищу Redis'''
 
     def __init__(self):
-        self.redis = Redis(host='127.0.0.1', db=1)
+        self.redis = Redis(host='redis', db=1)
 
 
 @dataclass
@@ -179,7 +179,7 @@ class GoogleManager:
     """
 
     CREDENTIALS_FILE = os.path.join(os.path.dirname(
-        __file__), 'idyllic-pact-405407-6d7a8f5eb056.json')
+        __file__), 'conf/google.json')
     ID = '1bH7qC8clHeWqkThHlf5DcDUv6g_XkCHkW-WKOxE8r6A'
 
     def __init__(self, sheet) -> None:
@@ -480,7 +480,7 @@ class VersionManager:
 
     """
     current_path = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(current_path, 'version.json')
+    file_path = os.path.join(current_path, 'conf/version.json')
     zabbix = zabbix_data()
     prefix = 'var vers = ['
     postfix = '''];

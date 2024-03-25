@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure-^s4_!=p=ie#f-6e%%uhbv53w4y%yz2mp$i_)+ri9y9$0aomijo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = ['http://192.168.234.25:8088']
+
 
 REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT')

@@ -4,5 +4,7 @@ RUN mkdir /app
 COPY . /app
 WORKDIR /app
 
+EXPOSE 8000
+
 RUN pip install -r requirements.txt && python manage.py collectstatic --noinput
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "web.wsgi"]
