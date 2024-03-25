@@ -1,0 +1,79 @@
+{% extends 'main/index.html' %}
+
+{% block content %}
+<div class="d-flex p-2 col-8 mx-auto">
+    <h3 id="{{ region.id }}">Клиент: {{ region }}</h3>
+</div>
+<div class="d-flex p-2 col-8 mx-auto">
+    <h5>ФИО пользователя: {{ user.name }}</h5>
+</div>
+<div class="d-flex p-2 col-8 mx-auto" >
+<form method="post" class="my-form" >
+    {% csrf_token %}
+    <div class="error mt-3 mb-3 text-danger">
+        {{ form.non_field_errors }}
+    </div>
+    {% for field in form.visible_fields %}
+
+                    <label for="{{ field.id_for_label }}" class="fs-6">{{ field.label }}</label>
+                    {{ field }}
+                <div class="error mt-2 text-danger text-start">
+                    {{ field.errors }}
+                </div>
+
+    {% endfor %}
+            <button type="submit" class=" btn btn-success btn-sm">Сохранить</button>
+            <a href="{% url 'one_mis_region' region.id %}" class="btn btn-secondary btn-sm">Назад</a>
+
+
+</form>
+</div>
+<script>
+const region = document.querySelector('h3');
+const form = document.querySelector('.my-form');
+const csrf = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+form.addEventListener('submit', function(event) {
+    // Отменяем стандартное поведение отправки формы
+    event.preventDefault();
+    let formData = {};
+    console.log(form.is_admin.checked);
+    // Получаем данные формы
+   for (let i = 1; i < form.length; i ++) {
+        formData[form[i].name] = form[i].value;
+        if (formData[form[i].name] === "") {
+            delete formData[form[i].name];
+            formData["region"] = region.id;
+            formData["user_id"] = {{ user.pk }};
+        }
+   }
+    if (form.is_admin.checked) {
+        formData.is_admin = true;
+    } else {
+        formData.is_admin = false;
+    }
+    // Сериализуем объект в JSON
+    const jsonData = JSON.stringify(formData);
+    // Опции запроса Fetch
+    const options = {
+        method: 'POST',
+        headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrf},
+        body: jsonData,
+
+    };
+
+    // Отправляем запрос на сервер
+    fetch(`/mis/${encodeURIComponent(region.id)}/`, options)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json()
+        }).then(data => {
+            alert("Пользователь успешно изменен");
+            window.location.replace(`/mis/${encodeURIComponent(region.id)}/`);
+        });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'main/index.html' %}
+
+
+{% block content %}
+<div class="d-flex p-2 col-8 mx-auto">
+    <a href="javascript:history.back()" class="btn btn-secondary btn-sm">Назад</a>
+</div>
+<div class="d-flex p-2 col-8 mx-auto">
+    <h4>Добавление пользователя</h4>
+</div>
+
+<div class="d-flex p-2 col-8 mx-auto">
+<form method="post" class="my-form">
+    {% csrf_token %}
+    <div class="error mt-3 mb-3 text-danger">
+        {{ form.non_field_errors }}
+    </div>
+    {% for field in form.visible_fields %}
+                    <label for="{{ field.id_for_label }}" class="fs-6">{{ field.label }}</label>
+                    {{ field }}
+
+                <div class="error mt-2 text-danger text-start">
+                    {{ field.errors }}
+                </div>
+
+    {% endfor %}
+            <button type="submit" class=" btn btn-success btn-sm">Отправить</button>
+</form>
+</div>
+
+<script>
+const form = document.querySelector('.my-form');
+const csrf = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+
+form.addEventListener('submit', function(event) {
+    // Отменяем стандартное поведение отправки формы
+    event.preventDefault();
+    payload = {};
+    // Создаем объект FormData для формы
+    const formData = new FormData(form);
+    let isFirstElement = true;
+    // Проходим по каждой паре ключ-значение в объекте FormData и выводим их
+    for (const [key, value] of formData.entries()) {
+       if (isFirstElement) {
+           isFirstElement = false;
+           continue;
+       }
+
+       const element = form.elements[key];
+       if (element && element.type === 'checkbox' && element.checked) {
+           payload["role"] = element.role;
+       } else {
+       payload[key] = element.value;
+       }
+    }
+    const currentUrl = window.location.href;
+    console.log(currentUrl);
+
+    // Разбиваем URL на сегменты
+    const urlSegments = currentUrl.split('/');
+
+    // Получаем только первые три сегмента
+    const target_path = '/' + urlSegments.slice(3, 5).join('/')  + '/';;
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrf},
+        body: JSON.stringify(payload),
+
+    })
+.then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json()
+    }).then(data => {
+        alert(data["message"]);
+        window.location.replace(target_path);
+    });
+    console.log(payload);
+});
+</script>
+{% endblock %}

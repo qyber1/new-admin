@@ -1,0 +1,68 @@
+version: "3.9"
+services:
+  postgres:
+    env_file:
+      - .env
+    container_name: postgres
+    image: postgres:16-alpine3.18
+    environment:
+      POSTGRES_DB: ${POSTGRES_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    container_name: redis
+    image: redis:7.2.3-alpine3.18
+    ports:
+      - "6379:6379"
+
+  web:
+    container_name: web
+    build: .
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - static:/app/static
+    expose:
+      - "8000"
+
+  worker:
+    container_name: worker
+    build: .
+    entrypoint: celery -A web worker -l INFO
+    depends_on:
+      - postgres
+      - redis
+
+  flower:
+    container_name: flower
+    build: .
+    entrypoint: celery -A web flower -l INFO
+    ports:
+      - "5555:5555"
+    depends_on:
+      - postgres
+      - redis
+
+  nginx:
+    container_name: nginx
+    image: nginx:stable
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - static:/app/static
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+
+
+
+volumes:
+  db_data:
+  static:

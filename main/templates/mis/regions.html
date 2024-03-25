@@ -1,0 +1,20 @@
+{% extends 'main/index.html' %}
+
+{% block content %}
+<div class="d-flex p-2 col-8 mx-auto">
+<h4>Клиент: </h4>
+</div>
+<div class="d-flex p-2 col-8 mx-auto">
+  <ol>
+  {% for region in regions %}
+      <li>
+          <a href="{% url 'one_mis_region' region.pk  %}" class="link-dark link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ region }}</a>
+      </li>
+      {% endfor %}
+
+  </ol>
+</div>
+
+{% endblock %}
+
+

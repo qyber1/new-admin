@@ -1,0 +1,75 @@
+{% extends 'main/index.html' %}
+
+
+{% block content %}
+{% csrf_token %}
+<div class="d-flex p-2 col-8 mx-auto">
+    <a href="{% url 'one_mis_region' region.id %}" class="btn btn-secondary btn-sm">Назад</a>
+</div>
+<div class="d-flex p-2 col-8 mx-auto">
+    <h3 id="{{ region.pk }}">Регион: {{ region }}</h3>
+</div>
+<div class="d-flex p-2 col-8 mx-auto">
+    <h4>Добавление пользователя</h4>
+</div>
+
+<div class="d-flex p-2 col-8 mx-auto">
+    <form method="get" action="">
+        {{ form }}
+        <button type="submit" class=" btn btn-success btn-sm">Отправить</button>
+    </form>
+</div>
+
+{% if result %}
+<div class="d-flex p-2 col-8 mx-auto">
+    <ol>
+        {% for user in result %}
+         <li id="{{ user.pk }}">
+             {{ user.name }} |
+             <label for="is_admin">Права администратора</label>
+             <input type="checkbox" id="is_admin">
+        </li>
+        <button type="submit" class="addUser btn btn-success btn-sm">Добавить</button>
+
+        {% endfor %}
+
+    </ol>
+</div>
+        {% endif %}
+
+<script>
+
+const region = document.querySelector('h3');
+const buttons = document.querySelectorAll(".addUser");
+
+buttons.forEach( function(button) {
+    button.addEventListener('click', addUser);
+});
+
+function addUser() {
+    const csrftoken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+    const dataRow = this.previousElementSibling;
+    const user = dataRow.getAttribute('id');
+    const is_admin = dataRow.querySelector('input').checked;
+    const payload = JSON.stringify({"region": region.id , "user": user, "is_admin": is_admin});
+
+    fetch(`/mis/${encodeURIComponent(region.id)}/`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken
+        },
+        body: payload
+    }).then(response => response.json()).then(data => {
+        if (data["is_ok"]) {
+            alert("Пользователь добавлен");
+            window.location.replace(`/mis/${encodeURIComponent(region.id)}/`);
+        } else {
+            alert("Пользователь уже закреплен за регионом");
+            window.location.reload();
+        }}
+    );
+};
+
+</script>
+{% endblock %}

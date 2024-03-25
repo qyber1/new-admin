@@ -1,0 +1,91 @@
+{% extends 'main/index.html' %}
+
+{% block content %}
+<div class="d-flex p-2 col-8 mx-auto">
+    <h5 id="{{ user.pk }}">{{ user.name }}</h5>
+</div>
+<div class="d-flex p-2 col-8 mx-auto">
+{% if user.role == 'MINI' %}
+    <p> Участник мини чата</p> {% else %} <p> Участник основного чата</p> {% endif %}
+</div>
+<div class="d-flex p-2 col-8 mx-auto" >
+<form method="post" class="my-form" >
+    {% csrf_token %}
+    <div class="error mt-1 mb-1 text-danger">
+        {{ form.non_field_errors }}
+    </div>
+    {% for field in form.visible_fields %}
+
+                    <label for="{{ field.id_for_label }}" class="fs-6">{{ field.label }}</label>
+                    {{ field }}
+                <div class="error mt-2 text-danger text-start">
+                    {{ field.errors }}
+                </div>
+
+    {% endfor %}
+            <button type="submit" class=" btn btn-success btn-sm">Сохранить</button>
+                {% if user.role == 'MAIN' %}
+            <a href="{% url 'core_users' %}" class="btn btn-secondary btn-sm">Назад</a>
+                {% else %}
+            <a href="{% url 'mini_users' %}" class="btn btn-secondary btn-sm">Назад</a>
+                {% endif %}
+</form>
+</div>
+<script>
+const form = document.querySelector('.my-form');
+const csrf = document.querySelector('[name="csrfmiddlewaretoken"]').value;
+const user_id = document.querySelector('h5').id
+form.addEventListener('submit', function(event) {
+    // Отменяем стандартное поведение отправки формы
+    event.preventDefault();
+
+    // Создаем объект FormData из формы
+    const formData = new FormData(form);
+    const payload = {"user": user_id};
+    let isFirstElement = true;
+
+    // Проходим по элементам FormData
+    for (const [key, value] of formData.entries()) {
+        // Если это первый элемент, пропускаем его
+        if (isFirstElement) {
+            isFirstElement = false;
+            continue;
+        }
+
+        // Проверяем, является ли элемент чекбоксом и был ли он отмечен
+        const element = form.elements[key];
+        if (element && element.type === 'checkbox' && element.checked) {
+            payload["role"] = element.role;
+        } else {
+            payload[key] = value;
+        }
+    }
+    window.location.href
+    const currentUrl = window.location.href;
+
+    // Разбиваем URL на сегменты
+    const urlSegments = currentUrl.split('/');
+
+    // Получаем только первые три сегмента
+    const target_path = '/' + urlSegments.slice(3, 5).join('/')  + '/';;
+    fetch(target_path, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrf},
+        body: JSON.stringify(payload),
+
+    })
+.then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json()
+    }).then(data => {
+        alert(data["message"]);
+        window.location.replace(target_path);
+    });
+    console.log(payload);
+});
+</script>
+{% endblock %}
